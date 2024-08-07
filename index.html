@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style media="screen">
+        td {
+            background-color: green;
+            width: 100px; height: 100px;
+            text-align: center;
+            font-size: 50px;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            cursor: pointer;
+        }
+        table { }
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #victory_screen {
+            display: none;
+            text-align: center;
+            z-index: 10;
+            position: absolute;
+            width: 650px;
+            height: 650px;
+            background-color: wheat;
+            border-color: darkslategrey;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        h2 {
+            margin-top: 130px;
+            font-size: 50px;
+            text-align: center;
+        }
+
+        #button_parent {
+            display: flex;
+            justify-content: center;
+        }
+
+        #button {
+            color: white;
+            background-color: black;
+            height: 50px;
+            width: 150px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #debug {
+            color: white;
+            background-color: black;
+            position: absolute;
+            right: 40px;
+            bottom: 40px;
+            height: 50px;
+            width: 150px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <table id="field" border="1"></table>
+    <div id="victory_screen">
+        <h2>Вы победили!</h2>
+        <br>
+        <div id="button_parent">
+            <div id="button">Начать заново</div>
+        </div>
+    </div>
+
+    <div id="debug">Отладка</div>
+
+    <script type="text/javascript">
+        let field = document.getElementById('field');
+        let victoryScreen = document.getElementById('victory_screen');
+        let button = document.getElementById('button');
+        let debug = document.getElementById('debug');
+
+        const n = 4;
+        let cellNull = n*n-1;
+
+        for (let i = 0; i < n; i++) {
+            let row = document.createElement("tr");
+            field.append(row);
+            for (let j = 0; j < n; j++) {
+                let cell = document.createElement("td");
+                row.appendChild(cell);
+                let t = i * n + j;
+                cell.append(document.createTextNode(i === n-1 && j === n-1 ? "" : t + 1));
+
+                cell.onclick = function () {
+                    /*console.log(t, this.textContent);*/
+                    move(t);
+                    checkWin();
+                }
+            }
+        }
+
+        let cells = document.getElementsByTagName('td');
+
+        function move(val) {
+            if (val % n === cellNull % n || (val - val % n) / n === (cellNull - cellNull % n) / n) {
+                shiftTextCells(val);
+            }
+            /*else {
+                console.log(val, val/n, '\n', cellNull, cellNull/n)
+            }*/
+        }
+
+        function shiftTextCells(val) {
+            let i_;
+            if (val > cellNull) i_ = 1;
+            else i_ = -1;
+
+            if ((val - cellNull) * i_ > n-1) {
+                i_ *= n;
+            }
+
+            for (let i = cellNull; i !== val; i += i_) {
+                cells[i].textContent = cells[i+i_].textContent;
+            }
+
+            cells[cellNull].style.backgroundColor = 'green';
+            cells[val].textContent = "";
+            cellNull = val;
+            cells[val].style.backgroundColor = 'grey';
+        }
+
+        function mixing() {
+            for (let i = 0; i < 1000; i++) {
+                let r = Math.trunc(Math.random() * n*n);
+                move(r);
+            }
+        }
+
+        mixing();
+
+        function checkWin() {
+            for (let i = 0; i < n*n-1; i++) {
+                if (cells[i].textContent !== (i+1).toString()) {
+                    return;
+                }
+            }
+            victoryScreen.style.display = 'block';
+        }
+
+        button.onclick = function () {
+            mixing();
+            victoryScreen.style.display = 'none';
+        }
+
+        debug.onclick = function () {
+            victoryScreen.style.display = 'block';
+        }
+
+    </script>
+</body>
+</html>
